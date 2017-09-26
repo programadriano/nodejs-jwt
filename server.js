@@ -16,7 +16,19 @@ app.use(bodyParser.json());
 app.use(morgan('dev'));
 var apiRoutes = express.Router();
 
+
+
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
+
+
 apiRoutes.post('/', function (req, res) {
+
+    
 
     if (req.body.UserName != "tadriano" || req.body.PassWord != "102030") {
         res.json({ success: false, message: 'Usuário ou senha incorreto(s)!' });
@@ -24,19 +36,19 @@ apiRoutes.post('/', function (req, res) {
     } else {
 
         let usuario = new user()
-        { 
-           name : "tadriano";
-           admin: true
-        }; 
+        {
+            name: "tadriano";
+            admin: true
+        };
 
         var token = jwt.sign(usuario, 'batman batman batman', {
             expiresInMinutes: 1440
         });
-     
+
         res.json({
             success: true,
             message: 'Token criado!!!',
-            toke: token
+            token: token
         });
     }
 
@@ -44,27 +56,27 @@ apiRoutes.post('/', function (req, res) {
 });
 
 
-apiRoutes.use(function(req, res, next) {
+apiRoutes.use(function (req, res, next) {
 
     var token = req.body.token || req.query.token || req.headers['x-access-token'];
 
-    if(token) {
-        jwt.verify(token, 'batman batman batman', function(err, decoded) {      
+    if (token) {
+        jwt.verify(token, 'batman batman batman', function (err, decoded) {
             if (err) {
-                return res.json({ success: false, message: 'Falha ao tentar autenticar o token!' });    
+                return res.json({ success: false, message: 'Falha ao tentar autenticar o token!' });
             } else {
-            //se tudo correr bem, salver a requisição para o uso em outras rotas
-            req.decoded = decoded;    
-            next();
+                //se tudo correr bem, salver a requisição para o uso em outras rotas
+                req.decoded = decoded;
+                next();
             }
         });
 
-        } else {
+    } else {
         // se não tiver o token, retornar o erro 403
-        return res.status(403).send({ 
-            success: false, 
-            message: '403 - Forbidden' 
-        });       
+        return res.status(403).send({
+            success: false,
+            message: '403 - Forbidden'
+        });
     }
 });
 
